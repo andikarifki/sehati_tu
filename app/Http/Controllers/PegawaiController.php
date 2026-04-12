@@ -8,7 +8,6 @@ use Inertia\Inertia;
 
 class PegawaiController extends Controller
 {
-    // Menampilkan daftar pegawai
     public function index()
     {
         return Inertia::render('Pegawai/Index', [
@@ -16,7 +15,11 @@ class PegawaiController extends Controller
         ]);
     }
 
-    // Menyimpan data pegawai baru
+    public function create()
+    {
+        return Inertia::render('Pegawai/Create');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -29,12 +32,41 @@ class PegawaiController extends Controller
 
         Pegawai::create($request->all());
 
-        return redirect()->back()->with('message', 'Data pegawai berhasil ditambahkan.');
+        return redirect()->route('pegawai.index')->with('message', 'Data pegawai berhasil ditambahkan.');
     }
 
-    // Menghapus data pegawai
-    public function destroy(Pegawai $pegawai)
+    // 1. TAMBAHKAN INI: Menampilkan form edit dengan data pegawai
+    public function edit($id)
     {
+        $pegawai = Pegawai::findOrFail($id);
+
+        return Inertia::render('Pegawai/Edit', [
+            'pegawai' => $pegawai,
+        ]);
+    }
+
+    // 2. TAMBAHKAN INI: Memproses perubahan data
+    public function update(Request $request, $id)
+    {
+        $pegawai = Pegawai::findOrFail($id);
+
+        $request->validate([
+            // NIP unik kecuali untuk ID pegawai ini sendiri
+            'nip' => 'required|max:18|unique:pegawais,nip,'.$id,
+            'nama' => 'required|string|max:255',
+            'pangkat' => 'required|string',
+            'golongan' => 'required|string',
+            'jabatan' => 'required|string',
+        ]);
+
+        $pegawai->update($request->all());
+
+        return redirect()->route('pegawai.index')->with('message', 'Data pegawai berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        $pegawai = Pegawai::findOrFail($id);
         $pegawai->delete();
 
         return redirect()->back()->with('message', 'Data pegawai berhasil dihapus.');
