@@ -11,7 +11,7 @@ class PegawaiController extends Controller
     public function index()
     {
         return Inertia::render('Pegawai/Index', [
-            'pegawai' => Pegawai::latest()->get(),
+            'pegawai' => Pegawai::orderBy('id', 'asc')->get(),
         ]);
     }
 
