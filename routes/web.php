@@ -1,7 +1,8 @@
 <?php
 
+use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\PegawaiController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileController; // Pastikan import ini ada
 use App\Models\Pegawai;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
     Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
+    Route::get('/arsip', [ArsipController::class, 'index'])->name('arsip.index');
+    Route::get('/arsip/create', [ArsipController::class, 'create'])->name('arsip.create');
 });
 
 require __DIR__.'/auth.php';

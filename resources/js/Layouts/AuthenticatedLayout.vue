@@ -103,6 +103,25 @@ const toggleSidebar = () => {
                         Data Pegawai
                     </span>
                 </NavLink>
+
+                <NavLink
+                    :href="route('arsip.index')"
+                    :active="route().current('arsip.index')"
+                    class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-white/10 border-none"
+                >
+                    <span
+                        class="text-xl filter drop-shadow-sm"
+                        :class="!isCollapsed ? 'mr-3' : 'mx-auto'"
+                    >
+                        📁
+                    </span>
+                    <span
+                        v-if="!isCollapsed"
+                        class="text-sm font-bold text-blue-100 group-hover:text-white whitespace-nowrap uppercase tracking-wide"
+                    >
+                        Arsip Dokumen
+                    </span>
+                </NavLink>
             </nav>
 
             <div
@@ -112,7 +131,7 @@ const toggleSidebar = () => {
                     v-if="!isCollapsed"
                     class="text-[9px] text-blue-400/80 uppercase font-black tracking-tighter whitespace-nowrap"
                 >
-                    v1.0 &copy; 2026 Badiklat Jateng
+                    v1.0 &copy; 2026 Bapelkum Semarang
                 </p>
                 <p v-else class="text-[9px] font-black text-yellow-400">V1</p>
             </div>
@@ -186,7 +205,7 @@ const toggleSidebar = () => {
     background-color: rgba(255, 255, 255, 0.12) !important;
     backdrop-filter: blur(4px);
     color: white !important;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 2px 4px rgba(251, 187, 187, 0.1);
 }
 
 :deep(a) {
