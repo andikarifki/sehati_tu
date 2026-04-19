@@ -20,26 +20,14 @@ class ArsipController extends Controller
 
         $query->when($search, function ($q, $search) {
             $q->where('judul', 'like', "%{$search}%")
-                ->orWhere('nomor_surat', 'like', "%{$search}%")
-                ->orWhere('pihak_terkait', 'like', "%{$search}%")
-                ->orWhere('kategori', 'like', "%{$search}%");
+                ->orWhere('nomor_surat', 'like', "%{$search}%");
         });
 
-        $arsip = $query->latest()->get()->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'judul' => $item->judul,
-                'nomor_surat' => $item->nomor_surat,
-                'tanggal_dokumen' => $item->tanggal_dokumen,
-                'kategori' => $item->kategori,
-                'pihak_terkait' => $item->pihak_terkait,
-                'file_path' => $item->file_path, // Ditambahkan untuk kebutuhan edit
-                'file_url' => asset('storage/'.$item->file_path),
-            ];
-        });
+        // Ubah latest()->get() menjadi latest()->paginate(jumlah_data)
+        $arsip = $query->latest()->paginate(10)->withQueryString();
 
         return Inertia::render('Arsip/Index', [
-            'arsip' => $arsip,
+            'arsip' => $arsip, // Sekarang ini berisi objek LengthAwarePaginator
             'filters' => ['search' => $search],
         ]);
     }

@@ -5,14 +5,12 @@ import { ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
 const props = defineProps({
-    arsip: Array, // Data dari ArsipController
-    filters: Object, // Status filter pencarian dari backend
+    arsip: Object, // Sekarang menerima Object (Paginator), bukan Array lagi
+    filters: Object,
 });
 
-// State untuk pencarian, mengambil nilai awal dari props filters jika ada
 const search = ref(props.filters?.search || "");
 
-// Watcher untuk menjalankan pencarian otomatis saat mengetik (Server-side search)
 watch(
     search,
     debounce((value) => {
@@ -20,14 +18,13 @@ watch(
             route("arsip.index"),
             { search: value },
             {
-                preserveState: true, // Menjaga state agar input tidak kehilangan fokus
-                replace: true, // Mengganti history URL agar tidak menumpuk saat back
+                preserveState: true,
+                replace: true,
             },
         );
     }, 400),
 );
 
-// Fungsi Hapus Dokumen
 const hapusArsip = (id) => {
     if (
         confirm(
@@ -129,14 +126,19 @@ const hapusArsip = (id) => {
                                 class="divide-y divide-gray-50 text-gray-600 font-medium"
                             >
                                 <tr
-                                    v-for="(a, index) in arsip"
+                                    v-for="(a, index) in arsip.data"
                                     :key="a.id"
                                     class="hover:bg-blue-50/30 transition-all group"
                                 >
                                     <td
                                         class="p-6 text-center text-gray-300 font-bold italic text-lg"
                                     >
-                                        {{ index + 1 }}
+                                        {{
+                                            (arsip.current_page - 1) *
+                                                arsip.per_page +
+                                            index +
+                                            1
+                                        }}
                                     </td>
 
                                     <td class="p-6">
@@ -153,7 +155,7 @@ const hapusArsip = (id) => {
                                             </span>
                                             <div class="inline-flex">
                                                 <span
-                                                    class="px-2.5 py-1 text-gray-800 font-mono font-bold text-xs md:text-sm"
+                                                    class="px-2.5 py-1 text-gray-800 font-mono font-bold text-xs md:text-sm bg-gray-50 rounded border border-gray-100"
                                                 >
                                                     {{
                                                         a.nomor_surat ||
@@ -176,48 +178,22 @@ const hapusArsip = (id) => {
                                         <span
                                             class="inline-flex items-center justify-center px-4 py-1.5 rounded-full font-black uppercase transition-all border shrink-0 min-w-[100px]"
                                             :class="{
-                                                'bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-50':
+                                                'bg-amber-50 text-amber-600 border-amber-200':
                                                     a.kategori === 'Nota Dinas',
-                                                'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm shadow-emerald-50':
+                                                'bg-emerald-50 text-emerald-600 border-emerald-200':
                                                     a.kategori ===
                                                     'Surat Masuk',
-                                                'bg-blue-50 text-blue-600 border-blue-200 shadow-sm shadow-blue-50':
+                                                'bg-blue-50 text-blue-600 border-blue-200':
                                                     a.kategori ===
                                                     'Surat Keluar',
-                                                'bg-purple-50 text-purple-600 border-purple-200 shadow-sm shadow-purple-50':
+                                                'bg-purple-50 text-purple-600 border-purple-200':
                                                     a.kategori === 'SK Pegawai',
-                                                'bg-gray-50 text-gray-500 border-gray-200':
-                                                    ![
-                                                        'Surat Masuk',
-                                                        'Surat Keluar',
-                                                        'SK Pegawai',
-                                                        'Nota Dinas',
-                                                    ].includes(a.kategori),
                                             }"
                                         >
                                             <span
-                                                class="w-1.5 h-1.5 rounded-full mr-2 hidden md:block"
-                                                :class="{
-                                                    'bg-amber-500':
-                                                        a.kategori ===
-                                                        'Nota Dinas',
-                                                    'bg-emerald-500':
-                                                        a.kategori ===
-                                                        'Surat Masuk',
-                                                    'bg-blue-500':
-                                                        a.kategori ===
-                                                        'Surat Keluar',
-                                                    'bg-purple-500':
-                                                        a.kategori ===
-                                                        'SK Pegawai',
-                                                }"
-                                            >
-                                            </span>
-                                            <span
                                                 class="text-[9px] md:text-[10px] whitespace-nowrap tracking-widest"
+                                                >{{ a.kategori }}</span
                                             >
-                                                {{ a.kategori }}
-                                            </span>
                                         </span>
                                     </td>
 
@@ -228,7 +204,7 @@ const hapusArsip = (id) => {
                                             <a
                                                 :href="a.file_url"
                                                 target="_blank"
-                                                class="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-blue-100"
+                                                class="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100"
                                                 title="Buka PDF"
                                             >
                                                 <svg
@@ -255,7 +231,7 @@ const hapusArsip = (id) => {
                                                 :href="
                                                     route('arsip.edit', a.id)
                                                 "
-                                                class="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-amber-100"
+                                                class="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-500 hover:text-white transition-all shadow-sm border border-amber-100"
                                                 title="Edit Dokumen"
                                             >
                                                 <svg
@@ -274,7 +250,7 @@ const hapusArsip = (id) => {
                                             </Link>
                                             <button
                                                 @click="hapusArsip(a.id)"
-                                                class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-red-100"
+                                                class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm border border-red-100"
                                                 title="Hapus Arsip"
                                             >
                                                 <svg
@@ -295,44 +271,49 @@ const hapusArsip = (id) => {
                                     </td>
                                 </tr>
 
-                                <tr v-if="arsip.length === 0">
-                                    <td colspan="5" class="p-32 text-center">
-                                        <div
-                                            class="flex flex-col items-center opacity-20"
+                                <tr v-if="arsip.data.length === 0">
+                                    <td
+                                        colspan="5"
+                                        class="p-32 text-center opacity-20"
+                                    >
+                                        <p
+                                            class="font-black uppercase tracking-[0.5em] text-xs"
                                         >
-                                            <svg
-                                                class="w-20 h-20 mb-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="1"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                />
-                                            </svg>
-                                            <p
-                                                class="font-black uppercase tracking-[0.5em] text-xs"
-                                            >
-                                                Arsip Tidak Ditemukan
-                                            </p>
-                                        </div>
+                                            Arsip Tidak Ditemukan
+                                        </p>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div
+                        v-if="arsip.links.length > 3"
+                        class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex justify-center flex-wrap gap-2"
+                    >
+                        <template v-for="(link, k) in arsip.links" :key="k">
+                            <div
+                                v-if="link.url === null"
+                                class="px-4 py-2 text-xs text-gray-400 border border-gray-100 rounded-xl"
+                                v-html="link.label"
+                            />
+                            <Link
+                                v-else
+                                :href="link.url"
+                                class="px-4 py-2 text-xs rounded-xl transition-all border"
+                                :class="{
+                                    'bg-blue-600 text-white border-blue-600 font-bold shadow-lg shadow-blue-100':
+                                        link.active,
+                                    'bg-white text-gray-600 border-gray-200 hover:border-blue-300':
+                                        !link.active,
+                                }"
+                                v-html="link.label"
+                                preserve-scroll
+                            />
+                        </template>
                     </div>
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-/* Transisi halus untuk baris tabel */
-tr {
-    backface-visibility: hidden;
-}
-</style>
