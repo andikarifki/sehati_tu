@@ -5,23 +5,29 @@ import { ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
 const props = defineProps({
-    arsip: Array,
-    filters: Object,
+    arsip: Array, // Data dari ArsipController
+    filters: Object, // Status filter pencarian dari backend
 });
 
+// State untuk pencarian, mengambil nilai awal dari props filters jika ada
 const search = ref(props.filters?.search || "");
 
+// Watcher untuk menjalankan pencarian otomatis saat mengetik (Server-side search)
 watch(
     search,
     debounce((value) => {
         router.get(
             route("arsip.index"),
             { search: value },
-            { preserveState: true, replace: true },
+            {
+                preserveState: true, // Menjaga state agar input tidak kehilangan fokus
+                replace: true, // Mengganti history URL agar tidak menumpuk saat back
+            },
         );
-    }, 300),
+    }, 400),
 );
 
+// Fungsi Hapus Dokumen
 const hapusArsip = (id) => {
     if (
         confirm(
@@ -78,15 +84,30 @@ const hapusArsip = (id) => {
                         :href="route('arsip.create')"
                         class="bg-[#0f172a] hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl text-sm font-bold transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center gap-2 uppercase tracking-widest w-full md:w-auto justify-center"
                     >
-                        <span>+</span> Upload Dokumen
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        Upload Dokumen
                     </Link>
                 </div>
 
                 <div
-                    class="bg-white shadow-2xl shadow-gray-200/50 rounded-[2rem] overflow-hidden border border-gray-100"
+                    class="bg-white shadow-2xl shadow-gray-200/50 rounded-[2.5rem] overflow-hidden border border-gray-100"
                 >
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left border-collapse">
+                        <table
+                            class="w-full text-sm text-left border-collapse min-w-[800px]"
+                        >
                             <thead>
                                 <tr
                                     class="bg-gray-50/50 text-gray-400 uppercase font-black text-[10px] tracking-[0.2em]"
@@ -94,9 +115,7 @@ const hapusArsip = (id) => {
                                     <th class="p-6 border-b text-center w-20">
                                         No
                                     </th>
-                                    <th class="p-6 border-b">
-                                        Tanggal & Nama Dokumen
-                                    </th>
+                                    <th class="p-6 border-b">Detail Dokumen</th>
                                     <th class="p-6 border-b">Pihak Terkait</th>
                                     <th class="p-6 border-b text-center">
                                         Kategori
@@ -123,29 +142,31 @@ const hapusArsip = (id) => {
                                     <td class="p-6">
                                         <div class="flex flex-col">
                                             <span
-                                                class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-1"
+                                                class="text-[9px] font-bold text-blue-500 uppercase tracking-[0.2em] mb-1"
                                             >
                                                 {{ a.tanggal_dokumen }}
                                             </span>
                                             <span
-                                                class="font-extrabold text-gray-900 text-xs md:text-sm leading-snug group-hover:text-blue-600 transition-colors uppercase"
+                                                class="font-medium text-gray-500 text-xs md:text-sm leading-snug group-hover:text-blue-600 transition-colors uppercase mb-1.5"
                                             >
                                                 {{ a.judul }}
                                             </span>
-                                            <span
-                                                class="px-2 py-0.5 text-gray-800 font-mono text-xs md:text-sm"
-                                            >
-                                                {{
-                                                    a.nomor_surat ||
-                                                    "No. Surat: -"
-                                                }}
-                                            </span>
+                                            <div class="inline-flex">
+                                                <span
+                                                    class="px-2.5 py-1 text-gray-800 font-mono font-bold text-xs md:text-sm"
+                                                >
+                                                    {{
+                                                        a.nomor_surat ||
+                                                        "No. Surat: -"
+                                                    }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </td>
 
                                     <td class="p-6 uppercase">
                                         <div
-                                            class="font-bold text-gray-700 text-xs"
+                                            class="font-bold text-gray-700 text-xs tracking-tight"
                                         >
                                             {{ a.pihak_terkait }}
                                         </div>
@@ -153,27 +174,18 @@ const hapusArsip = (id) => {
 
                                     <td class="p-6 text-center">
                                         <span
-                                            class="inline-flex items-center justify-center px-3 py-1 rounded-full font-black uppercase tracking-tighter md:tracking-widest transition-all border shrink-0 min-w-[80px]"
+                                            class="inline-flex items-center justify-center px-4 py-1.5 rounded-full font-black uppercase transition-all border shrink-0 min-w-[100px]"
                                             :class="{
-                                                // Nota Dinas (Kuning/Orange)
-                                                'bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-100':
+                                                'bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-50':
                                                     a.kategori === 'Nota Dinas',
-
-                                                // Surat Masuk (Hijau)
-                                                'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm shadow-emerald-100':
+                                                'bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm shadow-emerald-50':
                                                     a.kategori ===
                                                     'Surat Masuk',
-
-                                                // Surat Keluar (Biru)
-                                                'bg-blue-50 text-blue-600 border-blue-200 shadow-sm shadow-blue-100':
+                                                'bg-blue-50 text-blue-600 border-blue-200 shadow-sm shadow-blue-50':
                                                     a.kategori ===
                                                     'Surat Keluar',
-
-                                                // SK Pegawai (Ungu)
-                                                'bg-purple-50 text-purple-600 border-purple-200 shadow-sm shadow-purple-100':
+                                                'bg-purple-50 text-purple-600 border-purple-200 shadow-sm shadow-purple-50':
                                                     a.kategori === 'SK Pegawai',
-
-                                                // Default jika kategori lain
                                                 'bg-gray-50 text-gray-500 border-gray-200':
                                                     ![
                                                         'Surat Masuk',
@@ -184,7 +196,7 @@ const hapusArsip = (id) => {
                                             }"
                                         >
                                             <span
-                                                class="w-1.5 h-1.5 rounded-full mr-1.5 hidden md:block"
+                                                class="w-1.5 h-1.5 rounded-full mr-2 hidden md:block"
                                                 :class="{
                                                     'bg-amber-500':
                                                         a.kategori ===
@@ -201,9 +213,8 @@ const hapusArsip = (id) => {
                                                 }"
                                             >
                                             </span>
-
                                             <span
-                                                class="text-[8px] md:text-[10px] whitespace-nowrap"
+                                                class="text-[9px] md:text-[10px] whitespace-nowrap tracking-widest"
                                             >
                                                 {{ a.kategori }}
                                             </span>
@@ -217,7 +228,8 @@ const hapusArsip = (id) => {
                                             <a
                                                 :href="a.file_url"
                                                 target="_blank"
-                                                class="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                                class="p-3 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-blue-100"
+                                                title="Buka PDF"
                                             >
                                                 <svg
                                                     class="w-5 h-5"
@@ -241,7 +253,8 @@ const hapusArsip = (id) => {
                                             </a>
                                             <button
                                                 @click="hapusArsip(a.id)"
-                                                class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                                class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-red-100"
+                                                title="Hapus Arsip"
                                             >
                                                 <svg
                                                     class="w-5 h-5"
@@ -282,7 +295,7 @@ const hapusArsip = (id) => {
                                             <p
                                                 class="font-black uppercase tracking-[0.5em] text-xs"
                                             >
-                                                Arsip Kosong
+                                                Arsip Tidak Ditemukan
                                             </p>
                                         </div>
                                     </td>
@@ -295,3 +308,10 @@ const hapusArsip = (id) => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+/* Transisi halus untuk baris tabel */
+tr {
+    backface-visibility: hidden;
+}
+</style>

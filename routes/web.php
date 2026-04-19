@@ -27,7 +27,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
     Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
-    Route::resource('arsip', ArsipController::class);
+    // --- MANAJEMEN ARSIP DIGITAL ---
+    // Rute Index (Halaman Utama & Pencarian)
+    Route::get('/arsip', [ArsipController::class, 'index'])->name('arsip.index');
+
+    // Rute Create (Form Upload)
+    Route::get('/arsip/create', [ArsipController::class, 'create'])->name('arsip.create');
+
+    // Rute Store (Proses Simpan ke Database & Storage)
+    Route::post('/arsip', [ArsipController::class, 'store'])->name('arsip.store');
+
+    // Rute Destroy (Proses Hapus Data & File Fisik)
+    // Gunakan {id} agar sesuai dengan parameter di ArsipController@destroy
+    Route::delete('/arsip/{id}', [ArsipController::class, 'destroy'])->name('arsip.destroy');
 });
 
 require __DIR__.'/auth.php';

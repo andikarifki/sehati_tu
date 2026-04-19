@@ -11,12 +11,26 @@ use Inertia\Inertia;
 class ArsipController extends Controller
 {
     /**
-     * Menampilkan daftar arsip
+     * Menampilkan daftar arsip dengan fitur pencarian
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil data arsip terbaru, sertakan data pegawai jika ada relasinya
-        $arsip = Arsip::with('pegawai')->latest()->get()->map(function ($item) {
+        // 1. Ambil keyword pencarian dari query string (?search=...)
+        $search = $request->input('search');
+
+        // 2. Query data arsip
+        $query = Arsip::query()->with('pegawai');
+
+        // 3. Logika Pencarian (Jika ada keyword)
+        $query->when($search, function ($q, $search) {
+            $q->where('judul', 'like', "%{$search}%")
+                ->orWhere('nomor_surat', 'like', "%{$search}%")
+                ->orWhere('pihak_terkait', 'like', "%{$search}%")
+                ->orWhere('kategori', 'like', "%{$search}%");
+        });
+
+        // 4. Ambil data terbaru dan lakukan mapping untuk URL file
+        $arsip = $query->latest()->get()->map(function ($item) {
             return [
                 'id' => $item->id,
                 'judul' => $item->judul,
@@ -24,13 +38,16 @@ class ArsipController extends Controller
                 'tanggal_dokumen' => $item->tanggal_dokumen,
                 'kategori' => $item->kategori,
                 'pihak_terkait' => $item->pihak_terkait,
-                // Mengambil URL file agar bisa dibuka di browser
                 'file_url' => asset('storage/'.$item->file_path),
             ];
         });
 
+        // 5. Kirim data arsip dan filter pencarian ke Vue
         return Inertia::render('Arsip/Index', [
             'arsip' => $arsip,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -39,7 +56,6 @@ class ArsipController extends Controller
      */
     public function create()
     {
-        // Ambil data pegawai untuk isi dropdown di form
         $pegawai = Pegawai::select('id', 'nama')->get();
 
         return Inertia::render('Arsip/Create', [
@@ -48,28 +64,24 @@ class ArsipController extends Controller
     }
 
     /**
-     * Menyimpan data arsip ke database dan file ke storage
+     * Menyimpan data arsip
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'judul' => 'required|string|max:255',
             'nomor_surat' => 'nullable|string|max:100',
             'tanggal_dokumen' => 'required|date',
             'kategori' => 'required|string',
             'pihak_terkait' => 'required|string',
-            'file' => 'required|mimes:pdf|max:2048', // Wajib PDF, Maks 2MB
+            'file' => 'required|mimes:pdf|max:2048',
         ]);
 
-        // 2. Proses Upload File
         $filePath = null;
         if ($request->hasFile('file')) {
-            // Simpan di folder: public/arsip/2026/...
             $filePath = $request->file('file')->store('arsip/'.date('Y'), 'public');
         }
 
-        // 3. Simpan ke Database
         Arsip::create([
             'judul' => $request->judul,
             'nomor_surat' => $request->nomor_surat,
@@ -78,7 +90,6 @@ class ArsipController extends Controller
             'pihak_terkait' => $request->pihak_terkait,
             'keterangan' => $request->keterangan,
             'file_path' => $filePath,
-            // Jika pilih pegawai, simpan ID-nya (opsional)
             'pegawai_id' => $request->pegawai_id ?? null,
         ]);
 
@@ -86,14 +97,13 @@ class ArsipController extends Controller
     }
 
     /**
-     * Menghapus arsip dan filenya
+     * Menghapus arsip
      */
     public function destroy($id)
     {
         $arsip = Arsip::findOrFail($id);
 
-        // Hapus file fisik dari storage agar tidak memenuhi server
-        if (Storage::disk('public')->exists($arsip->file_path)) {
+        if ($arsip->file_path && Storage::disk('public')->exists($arsip->file_path)) {
             Storage::disk('public')->delete($arsip->file_path);
         }
 
