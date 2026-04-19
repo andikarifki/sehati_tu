@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
 
     // Rute Store (Proses Simpan ke Database & Storage)
     Route::post('/arsip', [ArsipController::class, 'store'])->name('arsip.store');
+    Route::get('/arsip/{id}/edit', [ArsipController::class, 'edit'])->name('arsip.edit');
+    Route::put('/arsip/{id}', [ArsipController::class, 'update'])->name('arsip.update'); // Gunakan PUT
 
     // Rute Destroy (Proses Hapus Data & File Fisik)
     // Gunakan {id} agar sesuai dengan parameter di ArsipController@destroy

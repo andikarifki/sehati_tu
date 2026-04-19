@@ -15,13 +15,9 @@ class ArsipController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil keyword pencarian dari query string (?search=...)
         $search = $request->input('search');
-
-        // 2. Query data arsip
         $query = Arsip::query()->with('pegawai');
 
-        // 3. Logika Pencarian (Jika ada keyword)
         $query->when($search, function ($q, $search) {
             $q->where('judul', 'like', "%{$search}%")
                 ->orWhere('nomor_surat', 'like', "%{$search}%")
@@ -29,7 +25,6 @@ class ArsipController extends Controller
                 ->orWhere('kategori', 'like', "%{$search}%");
         });
 
-        // 4. Ambil data terbaru dan lakukan mapping untuk URL file
         $arsip = $query->latest()->get()->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -38,34 +33,24 @@ class ArsipController extends Controller
                 'tanggal_dokumen' => $item->tanggal_dokumen,
                 'kategori' => $item->kategori,
                 'pihak_terkait' => $item->pihak_terkait,
+                'file_path' => $item->file_path, // Ditambahkan untuk kebutuhan edit
                 'file_url' => asset('storage/'.$item->file_path),
             ];
         });
 
-        // 5. Kirim data arsip dan filter pencarian ke Vue
         return Inertia::render('Arsip/Index', [
             'arsip' => $arsip,
-            'filters' => [
-                'search' => $search,
-            ],
+            'filters' => ['search' => $search],
         ]);
     }
 
-    /**
-     * Menampilkan form upload
-     */
     public function create()
     {
         $pegawai = Pegawai::select('id', 'nama')->get();
 
-        return Inertia::render('Arsip/Create', [
-            'pegawai' => $pegawai,
-        ]);
+        return Inertia::render('Arsip/Create', ['pegawai' => $pegawai]);
     }
 
-    /**
-     * Menyimpan data arsip
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -97,8 +82,61 @@ class ArsipController extends Controller
     }
 
     /**
-     * Menghapus arsip
+     * Menampilkan form edit (BARU)
      */
+    public function edit($id)
+    {
+        $arsip = Arsip::findOrFail($id);
+        $pegawai = Pegawai::select('id', 'nama')->get();
+
+        return Inertia::render('Arsip/Edit', [
+            'arsip' => $arsip,
+            'pegawai' => $pegawai,
+        ]);
+    }
+
+    /**
+     * Memperbarui data arsip (BARU)
+     */
+    public function update(Request $request, $id)
+    {
+        $arsip = Arsip::findOrFail($id);
+
+        // Validasi (file dibuat nullable karena tidak wajib ganti file saat edit)
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'nomor_surat' => 'nullable|string|max:100',
+            'tanggal_dokumen' => 'required|date',
+            'kategori' => 'required|string',
+            'pihak_terkait' => 'required|string',
+            'file' => 'nullable|mimes:pdf|max:2048',
+        ]);
+
+        $data = [
+            'judul' => $request->judul,
+            'nomor_surat' => $request->nomor_surat,
+            'tanggal_dokumen' => $request->tanggal_dokumen,
+            'kategori' => $request->kategori,
+            'pihak_terkait' => $request->pihak_terkait,
+            'keterangan' => $request->keterangan,
+            'pegawai_id' => $request->pegawai_id ?? null,
+        ];
+
+        // Logika Ganti File
+        if ($request->hasFile('file')) {
+            // 1. Hapus file lama dari storage
+            if ($arsip->file_path && Storage::disk('public')->exists($arsip->file_path)) {
+                Storage::disk('public')->delete($arsip->file_path);
+            }
+            // 2. Upload file baru
+            $data['file_path'] = $request->file('file')->store('arsip/'.date('Y'), 'public');
+        }
+
+        $arsip->update($data);
+
+        return redirect()->route('arsip.index')->with('success', 'Arsip berhasil diperbarui.');
+    }
+
     public function destroy($id)
     {
         $arsip = Arsip::findOrFail($id);
