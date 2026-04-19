@@ -2,65 +2,103 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia; // Pastikan baris ini benar
+use App\Models\Arsip;
+use App\Models\Pegawai;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class ArsipController extends Controller
 {
+    /**
+     * Menampilkan daftar arsip
+     */
     public function index()
     {
-        // Data dummy dengan struktur yang lebih ramping
-        $dataDummy = [
-            [
-                'id' => 1,
-                'judul' => 'SK Kenaikan Pangkat 2024',
-                'nomor_surat' => '800/123/BAPELKUM/2024',
-                'kategori' => 'SK Pegawai',
-                'pihak_terkait' => 'Budi Santoso, S.H.',
-                'file_url' => '#',
-            ],
-            [
-                'id' => 2,
-                'judul' => 'Undangan Rapat Koordinasi Kanwil',
-                'nomor_surat' => 'W13.UM.01.01-442',
-                'kategori' => 'Surat Masuk',
-                'pihak_terkait' => 'Kanwil Kemenkumham Jateng',
-                'file_url' => '#',
-            ],
-            [
-                'id' => 3,
-                'judul' => 'Nota Dinas Pengadaan ATK TW II',
-                'nomor_surat' => 'B/ND-12/Bapelkum/IV/2026',
-                'kategori' => 'Nota Dinas',
-                'pihak_terkait' => 'Subbagian Tata Usaha',
-                'file_url' => '#',
-            ],
-            [
-                'id' => 4,
-                'judul' => 'Surat Pengiriman Laporan Bulanan',
-                'nomor_surat' => '800/556/Bapelkum/2026',
-                'kategori' => 'Surat Keluar',
-                'pihak_terkait' => 'BPSDM Hukum dan HAM',
-                'file_url' => '#',
-            ],
-        ];
+        // Mengambil data arsip terbaru, sertakan data pegawai jika ada relasinya
+        $arsip = Arsip::with('pegawai')->latest()->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'judul' => $item->judul,
+                'nomor_surat' => $item->nomor_surat,
+                'tanggal_dokumen' => $item->tanggal_dokumen,
+                'kategori' => $item->kategori,
+                'pihak_terkait' => $item->pihak_terkait,
+                // Mengambil URL file agar bisa dibuka di browser
+                'file_url' => asset('storage/'.$item->file_path),
+            ];
+        });
 
         return Inertia::render('Arsip/Index', [
-            'arsip' => $dataDummy,
+            'arsip' => $arsip,
         ]);
     }
 
+    /**
+     * Menampilkan form upload
+     */
     public function create()
     {
-        // Data dummy pegawai agar dropdown di halaman Create muncul isinya
-        $pegawaiDummy = [
-            ['id' => 1, 'nama' => 'Budi Santoso, S.H.'],
-            ['id' => 2, 'nama' => 'Siti Aminah, M.H.'],
-            ['id' => 3, 'nama' => 'Eko Prasetyo, S.Sos.'],
-            ['id' => 4, 'nama' => 'Dian Sastro, M.Pd.'],
-        ];
+        // Ambil data pegawai untuk isi dropdown di form
+        $pegawai = Pegawai::select('id', 'nama')->get();
 
         return Inertia::render('Arsip/Create', [
-            'pegawai' => $pegawaiDummy,
+            'pegawai' => $pegawai,
         ]);
+    }
+
+    /**
+     * Menyimpan data arsip ke database dan file ke storage
+     */
+    public function store(Request $request)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'nomor_surat' => 'nullable|string|max:100',
+            'tanggal_dokumen' => 'required|date',
+            'kategori' => 'required|string',
+            'pihak_terkait' => 'required|string',
+            'file' => 'required|mimes:pdf|max:2048', // Wajib PDF, Maks 2MB
+        ]);
+
+        // 2. Proses Upload File
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            // Simpan di folder: public/arsip/2026/...
+            $filePath = $request->file('file')->store('arsip/'.date('Y'), 'public');
+        }
+
+        // 3. Simpan ke Database
+        Arsip::create([
+            'judul' => $request->judul,
+            'nomor_surat' => $request->nomor_surat,
+            'tanggal_dokumen' => $request->tanggal_dokumen,
+            'kategori' => $request->kategori,
+            'pihak_terkait' => $request->pihak_terkait,
+            'keterangan' => $request->keterangan,
+            'file_path' => $filePath,
+            // Jika pilih pegawai, simpan ID-nya (opsional)
+            'pegawai_id' => $request->pegawai_id ?? null,
+        ]);
+
+        return redirect()->route('arsip.index')->with('success', 'Dokumen berhasil diarsipkan.');
+    }
+
+    /**
+     * Menghapus arsip dan filenya
+     */
+    public function destroy($id)
+    {
+        $arsip = Arsip::findOrFail($id);
+
+        // Hapus file fisik dari storage agar tidak memenuhi server
+        if (Storage::disk('public')->exists($arsip->file_path)) {
+            Storage::disk('public')->delete($arsip->file_path);
+        }
+
+        $arsip->delete();
+
+        return redirect()->back()->with('success', 'Arsip berhasil dihapus.');
     }
 }

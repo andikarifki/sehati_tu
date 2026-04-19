@@ -27,8 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
     Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
-    Route::get('/arsip', [ArsipController::class, 'index'])->name('arsip.index');
-    Route::get('/arsip/create', [ArsipController::class, 'create'])->name('arsip.create');
+    Route::resource('arsip', ArsipController::class);
 });
 
 require __DIR__.'/auth.php';
