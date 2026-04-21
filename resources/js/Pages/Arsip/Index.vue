@@ -288,29 +288,52 @@ const hapusArsip = (id) => {
                     </div>
 
                     <div
-                        v-if="arsip.links.length > 3"
-                        class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex justify-center flex-wrap gap-2"
+                        v-if="arsip.links.length > 1"
+                        class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4"
                     >
-                        <template v-for="(link, k) in arsip.links" :key="k">
-                            <div
-                                v-if="link.url === null"
-                                class="px-4 py-2 text-xs text-gray-400 border border-gray-100 rounded-xl"
-                                v-html="link.label"
-                            />
-                            <Link
-                                v-else
-                                :href="link.url"
-                                class="px-4 py-2 text-xs rounded-xl transition-all border"
-                                :class="{
-                                    'bg-blue-600 text-white border-blue-600 font-bold shadow-lg shadow-blue-100':
-                                        link.active,
-                                    'bg-white text-gray-600 border-gray-200 hover:border-blue-300':
-                                        !link.active,
-                                }"
-                                v-html="link.label"
-                                preserve-scroll
-                            />
-                        </template>
+                        <div
+                            class="text-[10px] font-black uppercase tracking-widest text-gray-400"
+                        >
+                            Menampilkan
+                            <span class="text-blue-600">{{
+                                arsip.from || 0
+                            }}</span>
+                            -
+                            <span class="text-blue-600">{{
+                                arsip.to || 0
+                            }}</span>
+                            dari
+                            <span class="text-gray-800 text-xs">{{
+                                arsip.total
+                            }}</span>
+                            Total Arsip
+                        </div>
+
+                        <div
+                            v-if="arsip.links.length > 3"
+                            class="flex flex-wrap gap-2"
+                        >
+                            <template v-for="(link, k) in arsip.links" :key="k">
+                                <div
+                                    v-if="link.url === null"
+                                    class="px-4 py-2 text-xs text-gray-400 border border-gray-100 rounded-xl"
+                                    v-html="link.label"
+                                />
+                                <Link
+                                    v-else
+                                    :href="link.url"
+                                    class="px-4 py-2 text-xs rounded-xl transition-all border"
+                                    :class="{
+                                        'bg-blue-600 text-white border-blue-600 font-bold shadow-lg shadow-blue-100':
+                                            link.active,
+                                        'bg-white text-gray-600 border-gray-200 hover:border-blue-300':
+                                            !link.active,
+                                    }"
+                                    v-html="link.label"
+                                    preserve-scroll
+                                />
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>

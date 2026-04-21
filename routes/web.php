@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController; // Pastikan import ini ada
+use App\Models\Arsip;
 use App\Models\Pegawai;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,6 +15,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
         'totalPegawai' => Pegawai::count(),
+        'totalArsip' => Arsip::count(), // Tambahkan baris ini
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

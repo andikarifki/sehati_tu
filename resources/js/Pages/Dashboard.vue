@@ -1,10 +1,11 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3"; // Menggunakan Link untuk navigasi SPA yang lebih mulus
+import { Head, Link } from "@inertiajs/vue3";
 
-// Ambil props totalPegawai dari Controller
+// Tambahkan totalArsip di props
 defineProps({
     totalPegawai: Number,
+    totalArsip: Number, // Tambahkan ini
 });
 </script>
 
@@ -26,7 +27,6 @@ defineProps({
                     <div
                         class="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-blue-50 opacity-50"
                     ></div>
-
                     <div
                         class="relative p-8 flex flex-col md:flex-row md:items-center md:justify-between"
                     >
@@ -42,31 +42,15 @@ defineProps({
                                 <span class="font-semibold text-gray-700"
                                     >Sistem Administrator</span
                                 >
-                                Bapelkum Semarang. Kelola data pegawai Anda
-                                dengan efisien di sini.
+                                Bapelkum Semarang.
                             </p>
-                        </div>
-                        <div class="mt-6 md:mt-0">
-                            <div
-                                class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-100"
-                            >
-                                <span class="relative flex h-3 w-3 mr-2">
-                                    <span
-                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"
-                                    ></span>
-                                    <span
-                                        class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"
-                                    ></span>
-                                </span>
-                                Sistem Aktif
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div
-                        class="group overflow-hidden bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 sm:rounded-2xl border border-gray-100"
+                        class="group overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 sm:rounded-2xl border border-gray-100"
                     >
                         <div class="p-6">
                             <div class="flex items-center justify-between">
@@ -81,14 +65,9 @@ defineProps({
                                     >
                                         {{ totalPegawai }}
                                     </h3>
-                                    <p
-                                        class="text-xs text-gray-400 mt-2 italic"
-                                    >
-                                        *Data tersinkronisasi
-                                    </p>
                                 </div>
                                 <div
-                                    class="p-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-300"
+                                    class="p-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform"
                                 >
                                     <svg
                                         class="w-8 h-8 text-white"
@@ -105,13 +84,12 @@ defineProps({
                                     </svg>
                                 </div>
                             </div>
-
                             <div class="mt-6 pt-4 border-t border-gray-50">
                                 <Link
                                     :href="route('pegawai.index')"
                                     class="flex items-center text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors"
                                 >
-                                    Lihat Detail Pegawai
+                                    Kelola Data Pegawai
                                     <svg
                                         class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
                                         fill="none"
@@ -131,10 +109,70 @@ defineProps({
                     </div>
 
                     <div
-                        class="hidden md:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center p-6"
+                        class="group overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 sm:rounded-2xl border border-gray-100"
+                    >
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p
+                                        class="text-sm font-bold text-gray-400 uppercase tracking-widest"
+                                    >
+                                        Total Arsip
+                                    </p>
+                                    <h3
+                                        class="mt-1 text-4xl font-black text-gray-900 leading-none"
+                                    >
+                                        {{ totalArsip }}
+                                    </h3>
+                                </div>
+                                <div
+                                    class="p-4 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-200 group-hover:scale-110 transition-transform"
+                                >
+                                    <svg
+                                        class="w-8 h-8 text-white"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-50">
+                                <Link
+                                    :href="route('arsip.index')"
+                                    class="flex items-center text-sm font-bold text-amber-600 hover:text-amber-800 transition-colors"
+                                >
+                                    Buka Arsip Digital
+                                    <svg
+                                        class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center p-6 text-center"
                     >
                         <span class="text-gray-400 text-sm font-medium italic"
-                            >Statistik lainnya akan muncul di sini...</span
+                            >Statistik penunjang lainnya akan muncul di
+                            sini...</span
                         >
                     </div>
                 </div>
