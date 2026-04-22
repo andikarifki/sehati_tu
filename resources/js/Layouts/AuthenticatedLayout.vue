@@ -6,11 +6,31 @@ import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { Link } from "@inertiajs/vue3";
 
-// State untuk toggle sidebar
+// State untuk toggle sidebar (Mengecilkan/Membesarkan)
 const isCollapsed = ref(false);
+
+// State untuk sub-menu Data Pegawai
+// Otomatis TRUE (terbuka) jika sedang berada di halaman pegawai atau non-pegawai
+const isMenuPegawaiOpen = ref(
+    route().current("pegawai.*") || route().current("non-pegawai.*"),
+);
 
 const toggleSidebar = () => {
     isCollapsed.value = !isCollapsed.value;
+    // Tutup sub-menu jika sidebar mengecil agar tampilan tetap rapi
+    if (isCollapsed.value) {
+        isMenuPegawaiOpen.value = false;
+    }
+};
+
+const toggleMenuPegawai = () => {
+    if (!isCollapsed.value) {
+        isMenuPegawaiOpen.value = !isMenuPegawaiOpen.value;
+    } else {
+        // Jika sidebar sedang kecil dan menu diklik, otomatis besarkan sidebar dan buka menu
+        isCollapsed.value = false;
+        isMenuPegawaiOpen.value = true;
+    }
 };
 </script>
 
@@ -72,37 +92,87 @@ const toggleSidebar = () => {
                     class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-white/10 border-none"
                 >
                     <span
-                        class="text-xl filter drop-shadow-sm"
+                        class="text-xl"
                         :class="!isCollapsed ? 'mr-3' : 'mx-auto'"
+                        >📊</span
                     >
-                        📊
-                    </span>
                     <span
                         v-if="!isCollapsed"
-                        class="text-sm font-bold text-blue-100 group-hover:text-white whitespace-nowrap uppercase tracking-wide"
+                        class="text-sm font-bold text-blue-100 group-hover:text-white uppercase tracking-wide"
                     >
                         Dashboard
                     </span>
                 </NavLink>
 
-                <NavLink
-                    :href="route('pegawai.index')"
-                    :active="route().current('pegawai.index')"
-                    class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-white/10 border-none"
-                >
-                    <span
-                        class="text-xl filter drop-shadow-sm"
-                        :class="!isCollapsed ? 'mr-3' : 'mx-auto'"
+                <div>
+                    <button
+                        @click="toggleMenuPegawai"
+                        :class="[
+                            route().current('pegawai.*') ||
+                            route().current('non-pegawai.*')
+                                ? 'bg-white/10 text-white font-bold'
+                                : 'text-blue-100',
+                            !isCollapsed ? 'justify-between' : 'justify-center',
+                        ]"
+                        class="w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-white/10"
                     >
-                        🗂️
-                    </span>
-                    <span
-                        v-if="!isCollapsed"
-                        class="text-sm font-bold text-blue-100 group-hover:text-white whitespace-nowrap uppercase tracking-wide"
+                        <div class="flex items-center">
+                            <span
+                                class="text-xl"
+                                :class="!isCollapsed ? 'mr-3' : ''"
+                                >👥</span
+                            >
+                            <span
+                                v-if="!isCollapsed"
+                                class="text-sm uppercase tracking-wide"
+                                >Data Pegawai</span
+                            >
+                        </div>
+                        <svg
+                            v-if="!isCollapsed"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 transition-transform duration-200"
+                            :class="isMenuPegawaiOpen ? 'rotate-180' : ''"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M19 9l-7 7-7-7"
+                            />
+                        </svg>
+                    </button>
+
+                    <div
+                        v-show="isMenuPegawaiOpen && !isCollapsed"
+                        class="mt-2 ml-4 space-y-1 border-l-2 border-white/10 pl-2 transition-all"
                     >
-                        Data Pegawai
-                    </span>
-                </NavLink>
+                        <NavLink
+                            :href="route('pegawai.index')"
+                            :active="route().current('pegawai.*')"
+                            class="flex items-center px-4 py-2 rounded-lg transition-all duration-200 group hover:bg-white/5 border-none"
+                        >
+                            <span
+                                class="text-sm font-medium text-blue-200 group-hover:text-white"
+                                >Pegawai ASN</span
+                            >
+                        </NavLink>
+
+                        <NavLink
+                            :href="route('non-pegawai.index')"
+                            :active="route().current('non-pegawai.*')"
+                            class="flex items-center px-4 py-2 rounded-lg transition-all duration-200 group hover:bg-white/5 border-none"
+                        >
+                            <span
+                                class="text-sm font-medium text-blue-200 group-hover:text-white"
+                                >Non-Pegawai</span
+                            >
+                        </NavLink>
+                    </div>
+                </div>
 
                 <NavLink
                     :href="route('arsip.index')"
@@ -110,14 +180,13 @@ const toggleSidebar = () => {
                     class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-white/10 border-none"
                 >
                     <span
-                        class="text-xl filter drop-shadow-sm"
+                        class="text-xl"
                         :class="!isCollapsed ? 'mr-3' : 'mx-auto'"
+                        >📁</span
                     >
-                        📁
-                    </span>
                     <span
                         v-if="!isCollapsed"
-                        class="text-sm font-bold text-blue-100 group-hover:text-white whitespace-nowrap uppercase tracking-wide"
+                        class="text-sm font-bold text-blue-100 group-hover:text-white uppercase tracking-wide"
                     >
                         Arsip Dokumen
                     </span>
@@ -129,7 +198,7 @@ const toggleSidebar = () => {
             >
                 <p
                     v-if="!isCollapsed"
-                    class="text-[9px] text-blue-400/80 uppercase font-black tracking-tighter whitespace-nowrap"
+                    class="text-[9px] text-blue-400/80 uppercase font-black tracking-tighter"
                 >
                     v1.0 &copy; 2026 Bapelkum Semarang
                 </p>
@@ -151,7 +220,7 @@ const toggleSidebar = () => {
                             <span class="inline-flex rounded-md shadow-sm">
                                 <button
                                     type="button"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-xl text-gray-600 bg-gray-50 hover:text-blue-600 hover:bg-blue-50 transition duration-150 ease-in-out focus:outline-none"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-xl text-gray-600 bg-gray-50 hover:text-blue-600 hover:bg-blue-50 transition duration-150"
                                 >
                                     {{ $page.props.auth.user.name }}
                                     <svg
@@ -172,9 +241,8 @@ const toggleSidebar = () => {
                             <DropdownLink
                                 :href="route('profile.edit')"
                                 class="font-bold"
+                                >Profile</DropdownLink
                             >
-                                Profile
-                            </DropdownLink>
                             <div class="border-t border-gray-100"></div>
                             <DropdownLink
                                 :href="route('logout')"
@@ -199,20 +267,18 @@ const toggleSidebar = () => {
 </template>
 
 <style scoped>
-/* Menghilangkan border default NavLink Breeze dan memberi efek aktif */
+/* Aktif link styling khusus untuk tema SEHATI */
 :deep(.border-indigo-400) {
     border-color: transparent !important;
     background-color: rgba(255, 255, 255, 0.12) !important;
     backdrop-filter: blur(4px);
     color: white !important;
-    box-shadow: inset 0 2px 4px rgba(251, 187, 187, 0.1);
 }
 
 :deep(a) {
     text-decoration: none !important;
 }
 
-/* Transisi halus untuk konten utama saat sidebar toggle */
 main {
     transition: padding 0.3s ease;
 }

@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\ArsipController;
-use App\Http\Controllers\PegawaiController;
-use App\Http\Controllers\ProfileController; // Pastikan import ini ada
+use App\Http\Controllers\NonPegawaiController;
+use App\Http\Controllers\PegawaiController; // Pastikan import ini ada
+use App\Http\Controllers\ProfileController;
 use App\Models\Arsip;
 use App\Models\Pegawai;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
     Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
+    Route::resource('non-pegawai', NonPegawaiController::class);
     // --- MANAJEMEN ARSIP DIGITAL ---
     // Rute Index (Halaman Utama & Pencarian)
     Route::get('/arsip', [ArsipController::class, 'index'])->name('arsip.index');
