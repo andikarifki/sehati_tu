@@ -3,26 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class PegawaiController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Menampilkan daftar pegawai.
+     */
+    public function index(Request $request): Response
     {
-        // 1. Ambil keyword pencarian dari query string (?search=...)
         $search = $request->input('search');
 
-        // 2. Query data pegawai dengan pengkondisian (if search exists)
         $pegawai = Pegawai::query()
             ->when($search, function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
                     ->orWhere('nip', 'like', "%{$search}%");
             })
-            ->orderBy('id', 'asc') // Mengurutkan ID terbaru di atas
+            ->orderBy('id', 'asc')
             ->get();
 
-        // 3. Render ke Vue dengan mengirim data pegawai dan status filter saat ini
         return Inertia::render('Pegawai/Index', [
             'pegawai' => $pegawai,
             'filters' => [
@@ -31,12 +35,18 @@ class PegawaiController extends Controller
         ]);
     }
 
-    public function create()
+    /**
+     * Form tambah pegawai.
+     */
+    public function create(): Response
     {
         return Inertia::render('Pegawai/Create');
     }
 
-    public function store(Request $request)
+    /**
+     * Simpan data pegawai baru.
+     */
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'nip' => 'required|unique:pegawais,nip|max:18',
@@ -51,24 +61,25 @@ class PegawaiController extends Controller
         return redirect()->route('pegawai.index')->with('message', 'Data pegawai berhasil ditambahkan.');
     }
 
-    // 1. TAMBAHKAN INI: Menampilkan form edit dengan data pegawai
-    public function edit($id)
+    /**
+     * Form edit pegawai.
+     * Menggunakan Route Model Binding (Pegawai $pegawai) menggantikan $id.
+     */
+    public function edit(Pegawai $pegawai): Response
     {
-        $pegawai = Pegawai::findOrFail($id);
-
         return Inertia::render('Pegawai/Edit', [
             'pegawai' => $pegawai,
         ]);
     }
 
-    // 2. TAMBAHKAN INI: Memproses perubahan data
-    public function update(Request $request, $id)
+    /**
+     * Update data pegawai.
+     */
+    public function update(Request $request, Pegawai $pegawai): RedirectResponse
     {
-        $pegawai = Pegawai::findOrFail($id);
-
         $request->validate([
-            // NIP unik kecuali untuk ID pegawai ini sendiri
-            'nip' => 'required|max:18|unique:pegawais,nip,'.$id,
+            // Menggunakan $pegawai->id agar pengecekan unique mengabaikan data ini sendiri
+            'nip' => 'required|max:18|unique:pegawais,nip,'.$pegawai->id,
             'nama' => 'required|string|max:255',
             'pangkat' => 'required|string',
             'golongan' => 'required|string',
@@ -80,11 +91,33 @@ class PegawaiController extends Controller
         return redirect()->route('pegawai.index')->with('message', 'Data pegawai berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    /**
+     * Hapus data pegawai.
+     */
+    public function destroy(Pegawai $pegawai): RedirectResponse
     {
-        $pegawai = Pegawai::findOrFail($id);
         $pegawai->delete();
 
         return redirect()->back()->with('message', 'Data pegawai berhasil dihapus.');
+    }
+
+    /**
+     * Export data ke PDF.
+     */
+    public function exportPdf(Request $request): HttpResponse
+    {
+        $search = $request->input('search');
+
+        $pegawai = Pegawai::query()
+            ->when($search, function ($query, $search) {
+                $query->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.pegawai', compact('pegawai'));
+
+        return $pdf->stream('daftar-pegawai.pdf');
     }
 }

@@ -6,10 +6,10 @@ import debounce from "lodash/debounce";
 
 const props = defineProps({
     pegawai: Array,
-    filters: Object, // Pastikan Controller mengirim ini
+    filters: Object,
 });
 
-// State search dengan pengaman jika props.filters null
+// State search
 const search = ref(props.filters?.search || "");
 
 // Watcher untuk pencarian otomatis
@@ -27,6 +27,12 @@ watch(
     }, 300),
 );
 
+// Fungsi Cetak PDF
+const cetakPdf = () => {
+    window.open(route("pegawai.pdf", { search: search.value }), "_blank");
+};
+
+// Fungsi Hapus Pegawai
 const hapusPegawai = (id) => {
     if (confirm("Apakah Anda yakin ingin menghapus data pegawai ini?")) {
         router.delete(route("pegawai.destroy", id));
@@ -46,9 +52,11 @@ const hapusPegawai = (id) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Header Actions -->
                 <div
                     class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 px-4 sm:px-0"
                 >
+                    <!-- Search Input -->
                     <div class="relative w-full md:w-80">
                         <span
                             class="absolute inset-y-0 left-0 flex items-center pl-3"
@@ -75,28 +83,54 @@ const hapusPegawai = (id) => {
                         />
                     </div>
 
-                    <Link
-                        :href="route('pegawai.create')"
-                        class="w-full md:w-auto text-center inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 border border-transparent rounded-xl font-bold text-sm text-white uppercase tracking-widest hover:bg-blue-700 transition duration-150 shadow-lg shadow-blue-200 active:transform active:scale-95"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <!-- Button Cetak PDF -->
+                        <button
+                            @click="cetakPdf"
+                            class="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-red-600 border border-transparent rounded-xl font-bold text-sm text-white uppercase tracking-widest hover:bg-red-700 transition duration-150 shadow-lg shadow-red-200 active:transform active:scale-95"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        Tambah Pegawai
-                    </Link>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 mr-2"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                />
+                            </svg>
+                            Cetak PDF
+                        </button>
+
+                        <!-- Link Tambah Pegawai -->
+                        <Link
+                            :href="route('pegawai.create')"
+                            class="w-full md:w-auto text-center inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 border border-transparent rounded-xl font-bold text-sm text-white uppercase tracking-widest hover:bg-blue-700 transition duration-150 shadow-lg shadow-blue-200 active:transform active:scale-95"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 mr-2"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            Tambah Pegawai
+                        </Link>
+                    </div>
                 </div>
 
+                <!-- Table Data -->
                 <div
                     class="bg-white shadow-xl sm:rounded-2xl border border-gray-100 overflow-hidden"
                 >
@@ -175,8 +209,7 @@ const hapusPegawai = (id) => {
                                                             p.id,
                                                         )
                                                     "
-                                                    class="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm"
-                                                    title="Edit Data"
+                                                    class="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -195,8 +228,7 @@ const hapusPegawai = (id) => {
                                                 </Link>
                                                 <button
                                                     @click="hapusPegawai(p.id)"
-                                                    class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-500 hover:text-white transition-all duration-200 shadow-sm"
-                                                    title="Hapus Data"
+                                                    class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"

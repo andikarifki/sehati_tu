@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     // Rute Destroy (Proses Hapus Data & File Fisik)
     // Gunakan {id} agar sesuai dengan parameter di ArsipController@destroy
     Route::delete('/arsip/{id}', [ArsipController::class, 'destroy'])->name('arsip.destroy');
+    Route::get('/pegawai/export-pdf', [PegawaiController::class, 'exportPdf'])->name('pegawai.pdf');
 });
 
 require __DIR__.'/auth.php';
