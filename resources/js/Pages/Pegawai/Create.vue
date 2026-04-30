@@ -7,6 +7,47 @@ import TextInput from "@/Components/TextInput.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 
+// 1. Daftar Pangkat & Golongan (Array Statis)
+const daftarPangkat = [
+    "Juru Muda",
+    "Juru Muda Tingkat I",
+    "Juru",
+    "Juru Tingkat I",
+    "Pengatur Muda",
+    "Pengatur Muda Tingkat I",
+    "Pengatur",
+    "Pengatur Tingkat I",
+    "Penata Muda",
+    "Penata Muda Tingkat I",
+    "Penata",
+    "Penata Tingkat I",
+    "Pembina",
+    "Pembina Tingkat I",
+    "Pembina Utama Muda",
+    "Pembina Utama Madya",
+    "Pembina Utama",
+];
+
+const daftarGolongan = [
+    "I/a",
+    "I/b",
+    "I/c",
+    "I/d",
+    "II/a",
+    "II/b",
+    "II/c",
+    "II/d",
+    "III/a",
+    "III/b",
+    "III/c",
+    "III/d",
+    "IV/a",
+    "IV/b",
+    "IV/c",
+    "IV/d",
+    "IV/e",
+];
+
 const form = useForm({
     nip: "",
     nama: "",
@@ -49,7 +90,7 @@ const submit = () => {
                                     Formulir Data
                                 </h3>
                                 <p
-                                    class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2 text-wrap"
+                                    class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-2"
                                 >
                                     Lengkapi administrasi pegawai Bapelkum
                                 </p>
@@ -57,6 +98,7 @@ const submit = () => {
                         </div>
 
                         <form @submit.prevent="submit" class="space-y-6">
+                            <!-- NIP -->
                             <div>
                                 <InputLabel
                                     for="nip"
@@ -77,98 +119,126 @@ const submit = () => {
                                 />
                             </div>
 
+                            <!-- Nama Lengkap -->
+                            <div>
+                                <InputLabel
+                                    for="nama"
+                                    value="Nama Lengkap"
+                                    class="font-bold text-xs text-gray-500 uppercase tracking-widest"
+                                />
+                                <TextInput
+                                    id="nama"
+                                    v-model="form.nama"
+                                    type="text"
+                                    class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
+                                    required
+                                />
+                                <InputError
+                                    :message="form.errors.nama"
+                                    class="mt-2"
+                                />
+                            </div>
+
+                            <!-- Grid Dropdown Pangkat & Golongan -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <InputLabel
-                                        for="nama"
-                                        value="Nama Lengkap"
-                                        class="font-bold text-xs text-gray-500 uppercase tracking-widest"
-                                    />
-                                    <TextInput
-                                        id="nama"
-                                        v-model="form.nama"
-                                        type="text"
-                                        class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.nama"
-                                        class="mt-2"
-                                    />
-                                </div>
                                 <div>
                                     <InputLabel
                                         for="pangkat"
                                         value="Pangkat"
                                         class="font-bold text-xs text-gray-500 uppercase tracking-widest"
                                     />
-                                    <TextInput
+                                    <select
                                         id="pangkat"
                                         v-model="form.pangkat"
-                                        type="text"
-                                        class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
+                                        class="mt-2 block w-full bg-gray-50 border-gray-200 focus:bg-white focus:ring-blue-500 focus:border-blue-500 rounded-xl shadow-sm transition-all"
                                         required
-                                    />
+                                    >
+                                        <option value="" disabled>
+                                            Pilih Pangkat
+                                        </option>
+                                        <option
+                                            v-for="p in daftarPangkat"
+                                            :key="p"
+                                            :value="p"
+                                        >
+                                            {{ p }}
+                                        </option>
+                                    </select>
                                     <InputError
                                         :message="form.errors.pangkat"
                                         class="mt-2"
                                     />
                                 </div>
-                            </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <InputLabel
                                         for="golongan"
                                         value="Golongan"
                                         class="font-bold text-xs text-gray-500 uppercase tracking-widest"
                                     />
-                                    <TextInput
+                                    <select
                                         id="golongan"
                                         v-model="form.golongan"
-                                        type="text"
-                                        class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
+                                        class="mt-2 block w-full bg-gray-50 border-gray-200 focus:bg-white focus:ring-blue-500 focus:border-blue-500 rounded-xl shadow-sm transition-all"
                                         required
-                                    />
+                                    >
+                                        <option value="" disabled>
+                                            Pilih Golongan
+                                        </option>
+                                        <option
+                                            v-for="g in daftarGolongan"
+                                            :key="g"
+                                            :value="g"
+                                        >
+                                            {{ g }}
+                                        </option>
+                                    </select>
                                     <InputError
                                         :message="form.errors.golongan"
                                         class="mt-2"
                                     />
                                 </div>
-                                <div>
-                                    <InputLabel
-                                        for="jabatan"
-                                        value="Jabatan"
-                                        class="font-bold text-xs text-gray-500 uppercase tracking-widest"
-                                    />
-                                    <TextInput
-                                        id="jabatan"
-                                        v-model="form.jabatan"
-                                        type="text"
-                                        class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.jabatan"
-                                        class="mt-2"
-                                    />
-                                </div>
                             </div>
 
+                            <!-- Jabatan -->
+                            <div>
+                                <InputLabel
+                                    for="jabatan"
+                                    value="Jabatan"
+                                    class="font-bold text-xs text-gray-500 uppercase tracking-widest"
+                                />
+                                <TextInput
+                                    id="jabatan"
+                                    v-model="form.jabatan"
+                                    type="text"
+                                    class="mt-2 block w-full bg-gray-50 border-gray-200 rounded-xl"
+                                    required
+                                />
+                                <InputError
+                                    :message="form.errors.jabatan"
+                                    class="mt-2"
+                                />
+                            </div>
+
+                            <!-- Tombol Aksi -->
                             <div
                                 class="mt-10 flex justify-end gap-4 pt-8 border-t border-gray-100"
                             >
                                 <Link :href="route('pegawai.index')">
                                     <SecondaryButton
                                         class="rounded-xl border-none font-bold text-gray-400 hover:text-gray-600"
-                                        >Batal</SecondaryButton
                                     >
+                                        Batal
+                                    </SecondaryButton>
                                 </Link>
                                 <PrimaryButton
-                                    class="px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl font-black tracking-widest shadow-xl shadow-blue-100"
+                                    class="px-10 py-4 bg-blue-600 hover:bg-blue-700 rounded-2xl font-black tracking-widest shadow-xl shadow-blue-100 transition-all active:scale-95"
                                     :disabled="form.processing"
                                 >
-                                    Simpan Data
+                                    <span v-if="form.processing"
+                                        >Menyimpan...</span
+                                    >
+                                    <span v-else>Simpan Data</span>
                                 </PrimaryButton>
                             </div>
                         </form>
