@@ -9,30 +9,23 @@ const props = defineProps({
     filters: Object,
 });
 
-// State search
 const search = ref(props.filters?.search || "");
 
-// Watcher untuk pencarian otomatis
 watch(
     search,
     debounce((value) => {
         router.get(
             route("pegawai.index"),
             { search: value },
-            {
-                preserveState: true,
-                replace: true,
-            },
+            { preserveState: true, replace: true },
         );
     }, 300),
 );
 
-// Fungsi Cetak PDF
 const cetakPdf = () => {
     window.open(route("pegawai.pdf", { search: search.value }), "_blank");
 };
 
-// Fungsi Hapus Pegawai
 const hapusPegawai = (id) => {
     if (confirm("Apakah Anda yakin ingin menghapus data pegawai ini?")) {
         router.delete(route("pegawai.destroy", id));
@@ -50,13 +43,12 @@ const hapusPegawai = (id) => {
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="py-12 bg-[#fcfdfd]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Header Actions -->
                 <div
-                    class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 px-4 sm:px-0"
+                    class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
                 >
-                    <!-- Search Input -->
                     <div class="relative w-full md:w-80">
                         <span
                             class="absolute inset-y-0 left-0 flex items-center pl-3"
@@ -79,52 +71,21 @@ const hapusPegawai = (id) => {
                             v-model="search"
                             type="text"
                             placeholder="Cari NIP atau Nama..."
-                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm transition-all duration-200"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
                         />
                     </div>
 
                     <div class="flex items-center gap-3 w-full md:w-auto">
-                        <!-- Button Cetak PDF -->
                         <button
                             @click="cetakPdf"
-                            class="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-red-600 border border-transparent rounded-xl font-bold text-sm text-white uppercase tracking-widest hover:bg-red-700 transition duration-150 shadow-lg shadow-red-200 active:transform active:scale-95"
+                            class="w-full md:w-auto px-5 py-2.5 bg-red-600 rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-red-700 shadow-md active:scale-95"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5 mr-2"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                />
-                            </svg>
                             Cetak PDF
                         </button>
-
-                        <!-- Link Tambah Pegawai -->
                         <Link
                             :href="route('pegawai.create')"
-                            class="w-full md:w-auto text-center inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 border border-transparent rounded-xl font-bold text-sm text-white uppercase tracking-widest hover:bg-blue-700 transition duration-150 shadow-lg shadow-blue-200 active:transform active:scale-95"
+                            class="w-full md:w-auto px-5 py-2.5 bg-blue-600 rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-blue-700 shadow-md active:scale-95 text-center"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5 mr-2"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
                             Tambah Pegawai
                         </Link>
                     </div>
@@ -132,15 +93,15 @@ const hapusPegawai = (id) => {
 
                 <!-- Table Data -->
                 <div
-                    class="bg-white shadow-xl sm:rounded-2xl border border-gray-100 overflow-hidden"
+                    class="bg-white shadow-xl sm:rounded-2xl border border-gray-200 overflow-hidden"
                 >
                     <div class="p-6">
                         <div class="overflow-x-auto">
                             <table
-                                class="w-full text-sm text-left border-collapse min-w-[800px]"
+                                class="w-full text-left border-collapse min-w-[850px]"
                             >
                                 <thead
-                                    class="bg-gray-50 text-gray-700 uppercase font-bold text-xs tracking-wider"
+                                    class="bg-gray-100 text-gray-800 uppercase font-black text-[10px] tracking-wider"
                                 >
                                     <tr>
                                         <th
@@ -148,23 +109,23 @@ const hapusPegawai = (id) => {
                                         >
                                             No
                                         </th>
-                                        <th class="p-4 border-b text-center">
-                                            NIP
+                                        <th class="p-4 border-b">
+                                            Informasi Pegawai
                                         </th>
                                         <th class="p-4 border-b">
-                                            Nama Pegawai
-                                        </th>
-                                        <th class="p-4 border-b text-center">
                                             Pangkat/Gol
                                         </th>
+                                        <!-- Rata Kiri -->
                                         <th class="p-4 border-b">Jabatan</th>
-                                        <th class="p-4 border-b text-center">
+                                        <th
+                                            class="p-4 border-b text-center w-32"
+                                        >
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody
-                                    class="divide-y divide-gray-200 text-gray-600 font-medium"
+                                    class="divide-y divide-gray-200 text-gray-700 font-medium text-sm"
                                 >
                                     <tr
                                         v-for="(p, index) in pegawai"
@@ -172,36 +133,50 @@ const hapusPegawai = (id) => {
                                         class="hover:bg-blue-50/50 transition-colors"
                                     >
                                         <td
-                                            class="p-4 text-center text-gray-400 font-medium italic"
+                                            class="p-4 text-center text-gray-500 font-bold"
                                         >
                                             {{ index + 1 }}
                                         </td>
-                                        <td
-                                            class="p-4 font-mono font-bold text-blue-700 text-sm text-center"
-                                        >
-                                            {{ p.nip }}
-                                        </td>
-                                        <td
-                                            class="p-4 font-bold text-gray-900 capitalize"
-                                        >
-                                            {{ p.nama }}
-                                        </td>
-                                        <td class="p-4 text-center">
-                                            {{ p.pangkat }}
-                                            <span
-                                                class="text-gray-400 text-xs font-normal"
-                                                >({{ p.golongan }})</span
+                                        <td class="p-4">
+                                            <div
+                                                class="flex flex-col space-y-1"
                                             >
+                                                <span
+                                                    class="font-black text-gray-900 text-base capitalize leading-tight"
+                                                >
+                                                    {{ p.nama }}
+                                                </span>
+                                                <span
+                                                    class="text-[13px] font-bold text-black bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200 w-fit"
+                                                >
+                                                    NIP: {{ p.nip }}
+                                                </span>
+                                            </div>
                                         </td>
-                                        <td
-                                            class="p-4 text-xs font-semibold uppercase tracking-tight text-gray-500"
-                                        >
-                                            {{ p.jabatan }}
+                                        <td class="p-4 text-left">
+                                            <!-- Rata Kiri -->
+                                            <span
+                                                class="font-bold text-gray-800 block leading-tight"
+                                                >{{ p.pangkat }}</span
+                                            >
+                                            <span
+                                                class="text-[11px] font-black text-blue-600 uppercase tracking-wide mt-1 block"
+                                            >
+                                                Gol: {{ p.golongan }}
+                                            </span>
+                                        </td>
+                                        <td class="p-4">
+                                            <span
+                                                class="text-[11px] font-bold uppercase text-gray-600 leading-snug block max-w-[200px]"
+                                            >
+                                                {{ p.jabatan }}
+                                            </span>
                                         </td>
                                         <td class="p-4 text-center">
                                             <div
                                                 class="flex justify-center items-center space-x-2"
                                             >
+                                                <!-- Tombol Edit -->
                                                 <Link
                                                     :href="
                                                         route(
@@ -209,7 +184,8 @@ const hapusPegawai = (id) => {
                                                             p.id,
                                                         )
                                                     "
-                                                    class="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                                    class="p-2 text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-700 hover:text-white transition-all border border-blue-200 active:scale-90"
+                                                    title="Edit"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -226,9 +202,12 @@ const hapusPegawai = (id) => {
                                                         />
                                                     </svg>
                                                 </Link>
+
+                                                <!-- Tombol Hapus -->
                                                 <button
                                                     @click="hapusPegawai(p.id)"
-                                                    class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                    class="p-2 text-red-700 bg-red-100 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-200 active:scale-90"
+                                                    title="Hapus"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -250,8 +229,8 @@ const hapusPegawai = (id) => {
                                     </tr>
                                     <tr v-if="pegawai.length === 0">
                                         <td
-                                            colspan="6"
-                                            class="p-16 text-center text-gray-400 italic"
+                                            colspan="5"
+                                            class="p-20 text-center text-gray-500 italic font-bold"
                                         >
                                             Data tidak ditemukan.
                                         </td>

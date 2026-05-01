@@ -63,10 +63,12 @@ class PegawaiController extends Controller
 
     /**
      * Form edit pegawai.
-     * Menggunakan Route Model Binding (Pegawai $pegawai) menggantikan $id.
+     * Menggunakan $id sesuai dengan route web {id}
      */
-    public function edit(Pegawai $pegawai): Response
+    public function edit($id): Response
     {
+        $pegawai = Pegawai::findOrFail($id);
+
         return Inertia::render('Pegawai/Edit', [
             'pegawai' => $pegawai,
         ]);
@@ -74,12 +76,15 @@ class PegawaiController extends Controller
 
     /**
      * Update data pegawai.
+     * Menggunakan $id sesuai dengan route web {id}
      */
-    public function update(Request $request, Pegawai $pegawai): RedirectResponse
+    public function update(Request $request, $id): RedirectResponse
     {
+        $pegawai = Pegawai::findOrFail($id);
+
         $request->validate([
-            // Menggunakan $pegawai->id agar pengecekan unique mengabaikan data ini sendiri
-            'nip' => 'required|max:18|unique:pegawais,nip,'.$pegawai->id,
+            // unique mengabaikan id yang sedang diedit
+            'nip' => 'required|max:18|unique:pegawais,nip,'.$id,
             'nama' => 'required|string|max:255',
             'pangkat' => 'required|string',
             'golongan' => 'required|string',
@@ -94,8 +99,9 @@ class PegawaiController extends Controller
     /**
      * Hapus data pegawai.
      */
-    public function destroy(Pegawai $pegawai): RedirectResponse
+    public function destroy($id): RedirectResponse
     {
+        $pegawai = Pegawai::findOrFail($id);
         $pegawai->delete();
 
         return redirect()->back()->with('message', 'Data pegawai berhasil dihapus.');
